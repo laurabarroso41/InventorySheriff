@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">InventorySheriff</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="no_bluetooth_device">This device has no Bluetooth hardware</string>
+    <string name="need_permission">For proper operation of InventorySheriff you must grant the required permissions. If you decide not to grant them, the application will close.</string>
+    <string name="warning">Warning</string>
+    <string name="grant_permission">Proceed to grant permissions</string>
+    <string name="closing_app">The application will close because it can not work without the specified permissions. Please consider granting them.</string>
+    <string name="enable_blueetoth">Enable bluetooth</string>
+    <string name="no_bluetooth_activated">You need to activate bluetooth</string>
+    <string name="establishing_connection">Establishing connection</string>
+    <string name="name">Name: </string>
+    <string name="address">Address: </string>
+    <string name="scan_failed">Scan failed</string>
+    <string name="bonding_started">"Bonding started with "</string>
+    <string name="bonding_succeeded">"Bonding succeeded with "</string>
+    <string name="bonding_failed">"Bonding failed with "</string>
+    <string name="bonding_lost">"Bonding lost with "</string>
+    <string name="connect">CONNECT</string>
+    <string name="connection_success">Connected successfully with device</string>
+    <string name="connection_congested">Connection congested on device</string>
+    <string name="connection_canceled">Connection canceled with device</string>
+    <string name="services_discovered">Services discovered</string>
+
+</resources>
