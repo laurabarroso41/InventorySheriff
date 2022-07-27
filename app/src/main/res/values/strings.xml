@@ -30,5 +30,14 @@
     <string name="connection_canceled">Connection canceled with device</string>
     <string name="services_discovered">Services discovered</string>
     <string name="reading_item_characteristics">Reading characteristics from the device</string>
+    <string name="title_activity_log_device">LogDeviceActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
 </resources>

@@ -41,5 +41,7 @@ dependencies {
     implementation 'com.github.weliem:blessed-android:2.0.6'
     // https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-android
     implementation group: 'com.j256.ormlite', name: 'ormlite-android', version: '6.1'
+    implementation 'androidx.navigation:navigation-fragment:2.5.0'
+    implementation 'androidx.navigation:navigation-ui:2.5.0'
 
 }
