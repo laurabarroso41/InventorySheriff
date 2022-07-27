@@ -29,5 +29,6 @@
     <string name="connection_congested">Connection congested on device</string>
     <string name="connection_canceled">Connection canceled with device</string>
     <string name="services_discovered">Services discovered</string>
+    <string name="reading_item_characteristics">Reading characteristics from the device</string>
 
 </resources>

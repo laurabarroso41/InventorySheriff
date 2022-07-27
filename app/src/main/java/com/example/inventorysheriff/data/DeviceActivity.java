@@ -1,7 +1,5 @@
 package com.example.inventorysheriff.data;
 
-import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,7 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.inventorysheriff.R;
+import com.example.inventorysheriff.data.model.BluetoothSheriffDevice;
+import com.example.inventorysheriff.data.model.DatabaseHelper;
 import com.google.android.material.snackbar.Snackbar;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.welie.blessed.BluetoothBytesParser;
 import com.welie.blessed.BluetoothCentralManager;
 import com.welie.blessed.BluetoothCentralManagerCallback;
@@ -31,29 +32,25 @@ import com.welie.blessed.ConnectionPriority;
 import com.welie.blessed.GattStatus;
 import com.welie.blessed.HciStatus;
 import com.welie.blessed.ScanFailure;
-import com.welie.blessed.WriteType;
 
-import java.util.Calendar;
+import java.sql.SQLException;
 import java.util.UUID;
+import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT16;
+import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT32;
 
 public class DeviceActivity extends AppCompatActivity {
 
     // UUIDs for the Device Information service (DIS)
     private static final UUID DIS_SERVICE_UUID = UUID.fromString("0000180A-0000-1000-8000-00805f9b34fb");
-    private static final UUID MANUFACTURER_NAME_CHARACTERISTIC_UUID = UUID.fromString("00002A29-0000-1000-8000-00805f9b34fb");
-    private static final UUID MODEL_NUMBER_CHARACTERISTIC_UUID = UUID.fromString("00002A24-0000-1000-8000-00805f9b34fb");
+    private static final UUID ITEM_CHARACTERISTIC_UUID = UUID.fromString("00002A29-0000-1000-8000-00805f9b34fb");
+    private static final UUID WEIGTH_CHARACTERISTIC_UUID = UUID.fromString("00002A24-0000-1000-8000-00805f9b34fb");
 
-    // UUIDs for the Current Time service (CTS)
-    private static final UUID CTS_SERVICE_UUID = UUID.fromString("00001805-0000-1000-8000-00805f9b34fb");
-    private static final UUID CURRENT_TIME_CHARACTERISTIC_UUID = UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb");
-
-    // UUIDs for the Battery Service (BAS)
-    private static final UUID BTS_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-    private static final UUID BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
+    private DatabaseHelper databaseHelper;
 
     private BluetoothCentralManager manager;
     private TextView deviceContent;
     private LinearLayout contentHolder;
+    private BluetoothSheriffDevice sheriffDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +58,9 @@ public class DeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_device);
         deviceContent = findViewById(R.id.device_content);
         contentHolder = findViewById(R.id.content_holder);
-
+        sheriffDevice = new BluetoothSheriffDevice();
         String address = savedInstanceState.getString("peripheral");
-
+        databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
         manager = new BluetoothCentralManager(DeviceActivity.this,
                 new BluetoothCentralManagerCallback() {
 
@@ -110,11 +107,6 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
 
-    private boolean isOmronBPM(final String name) {
-        return name.contains("BLESmart_") || name.contains("BLEsmart_");
-    }
-
-
     public void connectToDevice(BluetoothPeripheral peripheral){
         Intent t = new Intent(this, DeviceActivity.class);
         t.putExtra("peripheral",peripheral.getAddress());
@@ -128,6 +120,25 @@ public class DeviceActivity extends AppCompatActivity {
                                                @NonNull BluetoothGattCharacteristic characteristic,
                                                @NonNull GattStatus status) {
                 super.onCharacteristicUpdate(peripheral, value, characteristic, status);
+                sheriffDevice.setName(peripheral.getName());
+                sheriffDevice.setAddress(peripheral.getAddress());
+
+                if(characteristic.getUuid().equals(ITEM_CHARACTERISTIC_UUID)){
+                    BluetoothBytesParser parser = new BluetoothBytesParser(value);
+                    // Parse flag byte
+                    final String id = parser.getStringValue();
+                    sheriffDevice.setItem(id);
+                }else if(characteristic.getUuid().equals(WEIGTH_CHARACTERISTIC_UUID)) {
+                    BluetoothBytesParser parser = new BluetoothBytesParser(value);
+                    double weight = parser.getFloatValue(FORMAT_UINT32) ;
+                    sheriffDevice.setWeight(weight);
+                }
+                //AQUÍ VIENE BASE DE DATOS
+                try {
+                    databaseHelper.getBluetoothSheriffDeviceDao().createOrUpdate(sheriffDevice);
+                } catch (SQLException e) {
+                    Log.e("blessed",e.getMessage());
+                }
                 Log.e("blessed","on characteristic update");
             }
 
@@ -216,24 +227,13 @@ public class DeviceActivity extends AppCompatActivity {
                 peripheral.requestMtu(BluetoothPeripheral.MAX_MTU);
                 // Request a new connection priority
                 peripheral.requestConnectionPriority(ConnectionPriority.HIGH);
-                peripheral.readCharacteristic(DIS_SERVICE_UUID, MANUFACTURER_NAME_CHARACTERISTIC_UUID);
-                peripheral.readCharacteristic(DIS_SERVICE_UUID, MODEL_NUMBER_CHARACTERISTIC_UUID);
-                // Turn on notifications for Current Time Service and write it if possible
-                BluetoothGattCharacteristic currentTimeCharacteristic =
-                        peripheral.getCharacteristic(CTS_SERVICE_UUID, CURRENT_TIME_CHARACTERISTIC_UUID);
-                if (currentTimeCharacteristic != null) {
-                    peripheral.setNotify(currentTimeCharacteristic, true);
 
-                    // If it has the write property we write the current time
-                    if ((currentTimeCharacteristic.getProperties() & PROPERTY_WRITE) > 0) {
-                        // Write the current time unless it is an Omron device
-                        if (!isOmronBPM(peripheral.getName())) {
-                            BluetoothBytesParser parser = new BluetoothBytesParser();
-                            parser.setCurrentTime(Calendar.getInstance());
-                            peripheral.writeCharacteristic(currentTimeCharacteristic, parser.getValue(), WriteType.WITH_RESPONSE);
-                        }
-                    }
+                boolean enqueueItemCharacteristic =  peripheral.readCharacteristic(DIS_SERVICE_UUID, ITEM_CHARACTERISTIC_UUID);
+                boolean enqueueWeightCharacteristic =  peripheral.readCharacteristic(DIS_SERVICE_UUID, WEIGTH_CHARACTERISTIC_UUID);
+                if(enqueueItemCharacteristic){
+                  deviceContent.setText(deviceContent.getText()+" \n "+ getString(R.string.reading_item_characteristics));
                 }
+
                 Toast.makeText(DeviceActivity.this,"servicio descubierto!",
                         Toast.LENGTH_LONG).show();
                 playSound();

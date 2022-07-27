@@ -55,7 +55,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE;
+
 public class DiscoveryDevicesActivity extends AppCompatActivity {
 
     private BluetoothCentralManager manager;
@@ -64,7 +66,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     private final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
     ListView devicesListView;
     List<BluetoothPeripheral> devices = new ArrayList<>();
-    DeviceListAdapter adapter ;
+    DeviceListAdapter adapter;
 
     private List<String> adresses = new ArrayList<>();
 
@@ -73,7 +75,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discovery_devices);
         devicesListView = findViewById(R.id.devices);
-        adapter = new DeviceListAdapter(devices,DiscoveryDevicesActivity.this);
+        adapter = new DeviceListAdapter(devices, DiscoveryDevicesActivity.this);
         devicesListView.setAdapter(adapter);
         ProgressBar progressBar = findViewById(R.id.progress);
         manager = new BluetoothCentralManager(DiscoveryDevicesActivity.this,
@@ -128,7 +130,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
                     public void onScanFailed(@NonNull ScanFailure scanFailure) {
                         super.onScanFailed(scanFailure);
                         Toast.makeText(DiscoveryDevicesActivity.this,
-                                        R.string.scan_failed,Toast.LENGTH_LONG).show();
+                                R.string.scan_failed, Toast.LENGTH_LONG).show();
                         Log.e("scan failed", "scan failed");
                     }
 
@@ -192,22 +194,21 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
                 checkPermissions();
             }
         } else {
-            Toast.makeText(this,R.string.no_bluetooth_device,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_bluetooth_device, Toast.LENGTH_LONG).show();
         }
     }
 
     private boolean isBluetoothEnabled() {
         BluetoothAdapter bluetoothAdapter = getBluetoothManager().getAdapter();
-        if(bluetoothAdapter == null) return false;
+        if (bluetoothAdapter == null) return false;
 
         return bluetoothAdapter.isEnabled();
     }
 
 
-     private BluetoothManager getBluetoothManager() {
-        return Objects.requireNonNull((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE),"cannot get BluetoothManager");
+    private BluetoothManager getBluetoothManager() {
+        return Objects.requireNonNull((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE), "cannot get BluetoothManager");
     }
-
 
 
     private void checkPermissions() {
@@ -243,7 +244,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     private boolean areLocationServicesEnabled() {
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null) {
-            Toast.makeText(this,"could not get location manager",Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "could not get location manager", Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -285,12 +286,11 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     }
 
 
-    public void connectToDevice(BluetoothPeripheral peripheral){
+    public void connectToDevice(BluetoothPeripheral peripheral) {
         Intent t = new Intent(this, DeviceActivity.class);
-        t.putExtra("peripheral",peripheral.getAddress());
+        t.putExtra("peripheral", peripheral.getAddress());
         startActivity(t);
     }
-
 
 
     @Override
