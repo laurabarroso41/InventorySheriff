@@ -1,9 +1,5 @@
 package com.example.inventorysheriff.data.model;
 
-/**
- * Created by Dani on 22/10/15.
- */
-
 import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
 
 import java.io.IOException;
