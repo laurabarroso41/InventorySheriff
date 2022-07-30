@@ -18,15 +18,15 @@
         android:theme="@style/Theme.InventorySheriff"
         tools:targetApi="31">
         <activity
-            android:name=".LogDeviceActivity"
+            android:name="com.example.inventorysheriff.data.LogDeviceActivity"
             android:exported="false"
             android:label="@string/title_activity_log_device"
             android:theme="@style/Theme.InventorySheriff.NoActionBar" />
         <activity
-            android:name=".DeviceActivity"
+            android:name="com.example.inventorysheriff.data.DeviceActivity"
             android:exported="false" />
         <activity
-            android:name=".DiscoveryDevicesActivity"
+            android:name="com.example.inventorysheriff.data.DiscoveryDevicesActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

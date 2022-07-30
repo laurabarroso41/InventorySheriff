@@ -1,11 +1,14 @@
 package com.example.inventorysheriff.data.model;
 
+import java.sql.Date;
+
 public class BluetoothSheriffDevice {
 
     private String name;
     private String address;
     private String item;
     private double weight;
+    private Date date;
 
     public String getName() {
         return name;
@@ -37,5 +40,13 @@ public class BluetoothSheriffDevice {
 
     public double getWeight() {
         return weight;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

@@ -25,6 +25,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -319,5 +321,28 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
                     .create()
                     .show();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.devices_log_menu:
+                startActivity(new Intent(DiscoveryDevicesActivity.this, LogDeviceActivity.class));
+                break;
+
+            default:
+                break;
+        }
+
+        return true;
     }
 }

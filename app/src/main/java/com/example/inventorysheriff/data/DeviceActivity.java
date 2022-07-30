@@ -33,6 +33,7 @@ import com.welie.blessed.GattStatus;
 import com.welie.blessed.HciStatus;
 import com.welie.blessed.ScanFailure;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.UUID;
 import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT16;
@@ -133,7 +134,7 @@ public class DeviceActivity extends AppCompatActivity {
                     double weight = parser.getFloatValue(FORMAT_UINT32) ;
                     sheriffDevice.setWeight(weight);
                 }
-                //AQUÍ VIENE BASE DE DATOS
+                sheriffDevice.setDate(new Date(new java.util.Date().getTime()));
                 try {
                     databaseHelper.getBluetoothSheriffDeviceDao().createOrUpdate(sheriffDevice);
                 } catch (SQLException e) {

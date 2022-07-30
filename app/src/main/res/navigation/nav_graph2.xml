@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.inventorysheriff.data.FirstFragment"
+        android:name="com.example.inventorysheriff.data.DeviceLogListFragment"
         android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
 
