@@ -20,7 +20,7 @@ import java.sql.SQLException;
  */
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
-    private static final String DATABASE_NAME = "dokuflex.db";
+    private static final String DATABASE_NAME = "sheriff.db";
     private static final int DATABASE_VERSION = 21;
 
     /**
@@ -48,7 +48,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Log.e("ERROR",e.getMessage());
         }
     }
 

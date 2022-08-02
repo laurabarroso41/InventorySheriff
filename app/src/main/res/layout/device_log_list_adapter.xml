@@ -11,7 +11,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView android:id="@+id/deviceDate" android:layout_width="wrap_content"
+        <TextView android:id="@+id/deviceDate" android:layout_width="match_parent"
+            android:padding="10dp" android:background="@android:color/holo_blue_light"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" android:visibility="gone"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/deviceName"
@@ -29,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:textStyle="italic"/>
+            android:textStyle="italic" android:layout_marginRight="20dp"/>
         <TextView
             android:id="@+id/weight"
             android:layout_width="wrap_content"

@@ -11,12 +11,14 @@ import android.widget.TextView;
 import com.example.inventorysheriff.R;
 import com.example.inventorysheriff.data.model.BluetoothSheriffDevice;
 
+import java.sql.Date;
 import java.util.List;
 
 public class DeviceLogListAdapter extends ArrayAdapter<BluetoothSheriffDevice> {
 
     private List<BluetoothSheriffDevice> dataSet;
-    Context mContext;
+    private Context mContext;
+    private Date lastDate;
 
     public DeviceLogListAdapter(List<BluetoothSheriffDevice> data, Context context) {
         super(context, R.layout.device_list_adapter, data);
@@ -65,9 +67,13 @@ public class DeviceLogListAdapter extends ArrayAdapter<BluetoothSheriffDevice> {
         result.startAnimation(animation);
         lastPosition = position;
         String name = dataModel.getName().isEmpty()? "Unnamed":dataModel.getName();
-        viewHolder.txtName.setText(name);
+        viewHolder.txtName.setText(name+" "+dataModel.getDeviceId());
         viewHolder.txtAddress.setText(dataModel.getAddress());
-        viewHolder.txtDate.setText(dataModel.getDate().toString());
+        if(lastDate == null || !lastDate.toString().equals(dataModel.getDate().toString())) {
+            viewHolder.txtDate.setText(dataModel.getDate().toString());
+            lastDate = dataModel.getDate();
+            viewHolder.txtDate.setVisibility(View.VISIBLE);
+        }
         viewHolder.txtWeigth.setText(String.valueOf(dataModel.getWeight()));
         // Return the completed view to render on screen
         return convertView;

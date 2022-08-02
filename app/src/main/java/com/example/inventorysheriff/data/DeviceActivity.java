@@ -42,9 +42,9 @@ import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT32;
 public class DeviceActivity extends AppCompatActivity {
 
     // UUIDs for the Device Information service (DIS)
-    private static final UUID DIS_SERVICE_UUID = UUID.fromString("0000180A-0000-1000-8000-00805f9b34fb");
-    private static final UUID ITEM_CHARACTERISTIC_UUID = UUID.fromString("00002A29-0000-1000-8000-00805f9b34fb");
-    private static final UUID WEIGTH_CHARACTERISTIC_UUID = UUID.fromString("00002A24-0000-1000-8000-00805f9b34fb");
+    private static final UUID DIS_SERVICE_UUID = UUID.fromString("8d95767d-7c8f-4ad9-bef2-cb61578935f1");
+    private static final UUID ITEM_CHARACTERISTIC_UUID = UUID.fromString("08a0de9a-1ae0-4e85-be85-a012d9b211f7");
+    private static final UUID WEIGTH_CHARACTERISTIC_UUID = UUID.fromString("d6e34b6c-72eb-4d9d-b425-96d85670af8a");
 
     private DatabaseHelper databaseHelper;
 

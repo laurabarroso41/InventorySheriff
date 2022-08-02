@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -18,6 +19,11 @@ import androidx.navigation.ui.NavigationUI;
 
 
 import com.example.inventorysheriff.R;
+import com.example.inventorysheriff.data.model.BluetoothSheriffDevice;
+import com.example.inventorysheriff.data.model.DatabaseHelper;
+
+import java.sql.Date;
+import java.sql.SQLException;
 
 
 public class LogDeviceActivity extends AppCompatActivity {
@@ -32,9 +38,36 @@ public class LogDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_device);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        try {
+            //createLogDevices();
+        }catch (Exception e){
+            Log.e("ERROR",e.getMessage());
+        }
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_log_device);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+    }
+
+    private void createLogDevices() throws SQLException {
+        DatabaseHelper helper = new DatabaseHelper(this);
+        for(int i = 0;i< 10;i++){
+            BluetoothSheriffDevice device = new BluetoothSheriffDevice();
+            device.setDate(new Date(new java.util.Date().getTime()));
+            device.setAddress("30:AE:A4:02:33:A2");
+            device.setName("sheriff");
+            device.setItem(String.valueOf(i));
+            device.setWeight(204.3+i);
+            helper.getDao(BluetoothSheriffDevice.class).create(device);
+        }
+        for(int i = 0;i< 10;i++){
+            BluetoothSheriffDevice device = new BluetoothSheriffDevice();
+            device.setDate(new Date(new java.util.Date().getTime()));
+            device.setAddress("30:AE:A4:02:33:A2");
+            device.setName("sheriff");
+            device.setItem(String.valueOf(i));
+            device.setWeight(207.3+i);
+            helper.getDao(BluetoothSheriffDevice.class).create(device);
+        }
     }
 
     @Override

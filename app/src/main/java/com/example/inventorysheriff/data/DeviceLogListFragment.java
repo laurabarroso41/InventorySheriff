@@ -15,6 +15,7 @@ import com.example.inventorysheriff.R;
 import com.example.inventorysheriff.data.adapter.DeviceLogListAdapter;
 import com.example.inventorysheriff.data.model.BluetoothSheriffDevice;
 import com.example.inventorysheriff.data.model.DatabaseHelper;
+import com.j256.ormlite.stmt.query.OrderBy;
 
 import java.util.List;
 
@@ -26,18 +27,18 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
     ListView devicesLogList;
     DeviceLogListAdapter adapter;
     private int visibleLastIndex = 0;   //Final Visual Item Index
-    private int visibleItemCount;       //Total number of visible items in the current window
+    private int visibleItemCount=10;       //Total number of visible items in the current window
     private Handler handler = new Handler();
     private ProgressBar progressBar;
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-    ) {
-
+            Bundle savedInstanceState)
+    {
         View view = inflater.inflate(R.layout.fragment_first, container, false);
         devicesLogList = view.findViewById(R.id.log_devices_list);
+        devicesLogList.setOnScrollListener(DeviceLogListFragment.this);
         progressBar = view.findViewById(R.id.progress);
         initAdapter();
         devicesLogList.setAdapter(adapter);
@@ -48,8 +49,8 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
         try {
             List<BluetoothSheriffDevice> data = new DatabaseHelper(getActivity()).
                     getDao(BluetoothSheriffDevice.class).queryBuilder().
-                    limit(Long.parseLong(String.valueOf(visibleItemCount)))
-                    .offset(Long.parseLong(String.valueOf(visibleLastIndex))).query();
+                    limit(Long.parseLong(String.valueOf(10)))
+                    .offset(Long.parseLong("0")).orderBy("date", false). query();
             adapter = new DeviceLogListAdapter(data, getActivity());
         }catch (Exception e){
             Log.e("ERROR",e.getMessage());
@@ -59,13 +60,16 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         int itemsLastIndex = adapter.getCount() - 1;    //Index of the Last Item of Data Set
-        int lastIndex = itemsLastIndex + 1;             //Add the loadMoreView item at the bottom
-        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && visibleLastIndex == lastIndex) {
+        int lastIndex = itemsLastIndex ;             //Add the loadMoreView item at the bottom
+        Log.e("index","visibleLastIndex = "+visibleLastIndex+" lastIndex = "+lastIndex);
+        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE &&
+                visibleLastIndex == lastIndex) {
             //If it's automatic loading, you can put asynchronous loading data code here.
             Log.i("LOADMORE", "loading...");
             loadMore(devicesLogList);
         }
     }
+
 
     /**
      * Click on the button event
@@ -73,15 +77,13 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
      */
     public void loadMore(View view) {
        progressBar.setVisibility(View.VISIBLE);
-        handler.postDelayed(new Runnable() {
+       handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-
                 loadData();
-                adapter.notifyDataSetChanged(); //Notify adapter when the data set changes
-                devicesLogList.setSelection(visibleLastIndex - visibleItemCount + 1); //Setting Selected Items
+                adapter.notifyDataSetChanged();
+                devicesLogList.setSelection(visibleLastIndex - visibleItemCount + 1);
                 progressBar.setVisibility(View.GONE);
-
             }
         }, 2000);
     }
@@ -89,11 +91,14 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
     private void loadData() {
         try {
             List<BluetoothSheriffDevice> list =adapter.getDataSet();
+            visibleItemCount +=10;
+            visibleLastIndex+=10;
             List<BluetoothSheriffDevice> aux =
             new DatabaseHelper(getActivity()).
                     getDao(BluetoothSheriffDevice.class).queryBuilder().
                     limit(Long.parseLong(String.valueOf(visibleItemCount)))
-                    .offset(Long.parseLong(String.valueOf(visibleLastIndex))).query();
+                    .offset(Long.parseLong(String.valueOf(visibleLastIndex))).
+                    orderBy("date", false).query();
             if (aux!=null && !aux.isEmpty()){
                 list.addAll(aux);
             }

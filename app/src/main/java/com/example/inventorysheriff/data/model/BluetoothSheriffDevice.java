@@ -1,14 +1,28 @@
 package com.example.inventorysheriff.data.model;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.sql.Date;
 
+@DatabaseTable(tableName = "bluetooth_sherif_device")
 public class BluetoothSheriffDevice {
-
+    @DatabaseField(columnName = "name")
     private String name;
+    @DatabaseField(columnName = "address")
     private String address;
+    @DatabaseField(generatedId = true, columnName = "device_id")
+    public int deviceId;
+    @DatabaseField(columnName = "item")
     private String item;
+    @DatabaseField(columnName = "weight")
     private double weight;
+    @DatabaseField(columnName = "date")
     private Date date;
+
+    public int getDeviceId() {
+        return deviceId;
+    }
 
     public String getName() {
         return name;

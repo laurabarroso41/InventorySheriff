@@ -3,15 +3,22 @@ package com.example.inventorysheriff.ui.login;
 import android.Manifest;
 import android.app.Activity;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -35,11 +42,16 @@ import com.example.inventorysheriff.ui.login.LoginViewModel;
 import com.example.inventorysheriff.ui.login.LoginViewModelFactory;
 import com.example.inventorysheriff.databinding.ActivityLoginBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private ActivityLoginBinding binding;
-    public static final int REQUEST_WRITE_STORAGE = 112;
+    public static final int REQUEST_PERMISSION = 112;
+
+    public static final int REQUEST_WRITE_STORAGE = 113;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,39 +142,111 @@ public class LoginActivity extends AppCompatActivity {
                         passwordEditText.getText().toString());
             }
         });
+        checkPermissions();
+    }
 
-        boolean hasPermission = hasPermissions(this,   Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.INTERNET, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_CONNECT);
-        if (!hasPermission) {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.need_permission);
-            builder.setTitle(R.string.warning);
-            builder.setPositiveButton(R.string.grant_permission, new DialogInterface.OnClickListener() {
+    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    ActivityCompat.requestPermissions(LoginActivity.this,
-                            new String[]{
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.INTERNET, Manifest.permission.BLUETOOTH,
-                                    Manifest.permission.BLUETOOTH_CONNECT
-                            }, REQUEST_WRITE_STORAGE);
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Toast.makeText(LoginActivity.this, "Permission granted",
+                                       Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
-            builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-
-                    dialogInterface.dismiss();
-                    finish();
-                }
-            });
-            builder.show();
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String[] missingPermissions = getMissingPermissions(getRequiredPermissions());
+            if (missingPermissions.length > 0) {
+                ActivityCompat.requestPermissions(LoginActivity.this,
+                       missingPermissions, REQUEST_PERMISSION);
+            }
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        switch (requestCode) {
+            case REQUEST_PERMISSION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(LoginActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+        }
+    }
+
+    private String[] getMissingPermissions(String[] requiredPermissions) {
+        List<String> missingPermissions = new ArrayList<>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String requiredPermission : requiredPermissions) {
+                if (getApplicationContext().checkSelfPermission(requiredPermission) != PackageManager.PERMISSION_GRANTED) {
+                    missingPermissions.add(requiredPermission);
+                }
+            }
+        }
+        return missingPermissions.toArray(new String[0]);
+    }
+
+    private String[] getRequiredPermissions() {
+        int targetSdkVersion = getApplicationInfo().targetSdkVersion;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S) {
+            return new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT};
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) {
+            return new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+        } else return new String[]{Manifest.permission.ACCESS_COARSE_LOCATION};
+    }
+
+    private boolean areLocationServicesEnabled() {
+        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            Toast.makeText(this, "could not get location manager", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return locationManager.isLocationEnabled();
+        } else {
+            boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            return isGpsEnabled || isNetworkEnabled;
+        }
+    }
+
+    private boolean checkLocationServices() {
+        if (!areLocationServicesEnabled()) {
+            new AlertDialog.Builder(LoginActivity.this)
+                    .setTitle("Location services are not enabled")
+                    .setMessage("Scanning for Bluetooth peripherals requires locations services to be enabled.") // Want to enable?
+                    .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // if this button is clicked, just close
+                            // the dialog box and do nothing
+                            dialog.cancel();
+                        }
+                    })
+                    .create()
+                    .show();
+            return false;
+        } else {
+            return true;
+        }
+    }
     public boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
@@ -175,10 +259,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
     private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-
         Intent t = new Intent(this, DiscoveryDevicesActivity.class);
         startActivity(t);
 
