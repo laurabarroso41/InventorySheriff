@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -57,8 +58,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -66,6 +69,8 @@ import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE;
 
 public class DiscoveryDevicesActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 113;
+    private static final int REQUEST_BLUETOOTH_CONNECT = 114;
     private BluetoothCentralManager manager;
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int ACCESS_LOCATION_REQUEST = 2;
@@ -73,12 +78,9 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     ListView devicesListView;
     List<BluetoothPeripheral> devices = new ArrayList<>();
     DeviceListAdapter adapter;
-
     private List<String> adresses = new ArrayList<>();
-    public static final int REQUEST_WRITE_STORAGE = 112;
     ProgressBar progressBar;
-    private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
-    private static final int PERMISSION_REQUEST_BACKGROUND_LOCATION = 2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,197 +90,22 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         adapter = new DeviceListAdapter(devices, DiscoveryDevicesActivity.this);
         devicesListView.setAdapter(adapter);
         progressBar = findViewById(R.id.progress);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (this.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    if (this.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                        builder.setTitle("This app needs background location access");
-                        builder.setMessage("Please grant location access so this app can detect beacons in the background.");
-                        builder.setPositiveButton(android.R.string.ok, null);
-                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                            @TargetApi(23)
-                            @Override
-                            public void onDismiss(DialogInterface dialog) {
-                                requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
-                                        PERMISSION_REQUEST_BACKGROUND_LOCATION);
-                            }
-
-                        });
-                        builder.show();
-                    } else {
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                        builder.setTitle("Functionality limited");
-                        builder.setMessage("Since background location access has not been granted, this app will not be able to discover beacons in the background.  Please go to Settings -> Applications -> Permissions and grant background location access to this app.");
-                        builder.setPositiveButton(android.R.string.ok, null);
-                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                            @Override
-                            public void onDismiss(DialogInterface dialog) {
-                            }
-
-                        });
-                        builder.show();
-                    }
-
-                }else{
-                    initBluetoothHandler();
-                }
-            } else {
-                if (!this.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION},
-                            PERMISSION_REQUEST_FINE_LOCATION);
-                }
-                else {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Functionality limited");
-                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons.  Please go to Settings -> Applications -> Permissions and grant location access to this app.");
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                        }
-
-                    });
-                    builder.show();
-                }
-
-            }
-        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH_SCAN}, 1);
+        else
+        initBluetoothHandler();
     }
 
-
-    private void checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String[] missingPermissions = getMissingPermissions(getRequiredPermissions());
-            if (missingPermissions.length > 0) {
-                requestPermissions(missingPermissions, ACCESS_LOCATION_REQUEST);
-            }
-        }
-    }
-
-    private String[] getMissingPermissions(String[] requiredPermissions) {
-        List<String> missingPermissions = new ArrayList<>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (String requiredPermission : requiredPermissions) {
-                if (getApplicationContext().checkSelfPermission(requiredPermission) != PackageManager.PERMISSION_GRANTED) {
-                    missingPermissions.add(requiredPermission);
-                }
-            }
-        }
-        return missingPermissions.toArray(new String[0]);
-    }
 
     private void initBluetoothHandler() {
         initializeManager();
         manager.scanForPeripherals();
     }
 
-    private void permissionsGranted() {
-        // Check if Location services are on because they are required to make scanning work for SDK < 31
-        int targetSdkVersion = getApplicationInfo().targetSdkVersion;
-       // if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && targetSdkVersion < Build.VERSION_CODES.S) {
-            if (checkLocationServices()) {
-                initBluetoothHandler();
-            }
-       /* } else {
-            initBluetoothHandler();
-        }*/
-    }
-
-    private boolean areLocationServicesEnabled() {
-        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        if (locationManager == null) {
-            Log.e("", "could not get location manager");
-            return false;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            return locationManager.isLocationEnabled();
-        } else {
-            boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            return isGpsEnabled || isNetworkEnabled;
-        }
-    }
-
-    private boolean checkLocationServices() {
-        if (!areLocationServicesEnabled()) {
-            new AlertDialog.Builder(DiscoveryDevicesActivity.this)
-                    .setTitle("Location services are not enabled")
-                    .setMessage("Scanning for Bluetooth peripherals requires locations services to be enabled.") // Want to enable?
-                    .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.cancel();
-                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // if this button is clicked, just close
-                            // the dialog box and do nothing
-                            dialog.cancel();
-                        }
-                    })
-                    .create()
-                    .show();
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (getBluetoothManager().getAdapter() != null) {
-            if (!isBluetoothEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                if (ActivityCompat.checkSelfPermission(this,
-                        Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
-                {
-                    return;
-                }
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            } else {
-                checkPermissions();
-            }
-        } else {
-            Toast.makeText(this, R.string.no_bluetooth_device, Toast.LENGTH_LONG).show();
-        }
-    }
 
 
 
-    private final BroadcastReceiver locationServiceStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null && action.equals(LocationManager.MODE_CHANGED_ACTION)) {
-                boolean isEnabled = areLocationServicesEnabled();
-                Log.e("","Location service state changed to: %s"+ isEnabled );
-                checkPermissions();
-            }
-        }
-    };
 
-    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        manager.scanForPeripherals();
-                    }
-                }
-            });
 
 
     private void initializeManager() {
@@ -345,41 +172,6 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         Log.e("blueetooth enabled", "blueetooth enabled? " + manager.isBluetoothEnabled());
     }
 
-    public boolean hasPermissions(Context context, String... permissions) {
-        if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-
-    private boolean isBluetoothEnabled() {
-        BluetoothAdapter bluetoothAdapter = getBluetoothManager().getAdapter();
-        if (bluetoothAdapter == null) return false;
-
-        return bluetoothAdapter.isEnabled();
-    }
-
-
-    private BluetoothManager getBluetoothManager() {
-        return Objects.requireNonNull((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE), "cannot get BluetoothManager");
-    }
-
-
-    private String[] getRequiredPermissions() {
-        int targetSdkVersion = getApplicationInfo().targetSdkVersion;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S) {
-            return new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT};
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) {
-            return new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
-        } else return new String[]{Manifest.permission.ACCESS_COARSE_LOCATION};
-    }
 
 
     public void connectToDevice(BluetoothPeripheral peripheral) {
@@ -392,9 +184,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
-
         return true;
     }
 
@@ -409,27 +199,25 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
             default:
                 break;
         }
-
         return true;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-    }
+        if (requestCode == REQUEST_ENABLE_BT) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                initBluetoothHandler();
+            }
+            else
+                finish();
+        }
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                initBluetoothHandler();
+            }else finish();
+        }
 
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode,
-            String permissions[],
-            int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initBluetoothHandler();
-                } else {
-                    Toast.makeText(DiscoveryDevicesActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
-                }
     }
 }
