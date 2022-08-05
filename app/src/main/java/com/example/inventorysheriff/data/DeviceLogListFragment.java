@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import com.example.inventorysheriff.R;
@@ -30,6 +31,7 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
     private int visibleItemCount=10;       //Total number of visible items in the current window
     private Handler handler = new Handler();
     private ProgressBar progressBar;
+    private TextView nodevicesTxt;
 
     @Override
     public View onCreateView(
@@ -40,6 +42,7 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
         devicesLogList = view.findViewById(R.id.log_devices_list);
         devicesLogList.setOnScrollListener(DeviceLogListFragment.this);
         progressBar = view.findViewById(R.id.progress);
+        nodevicesTxt = view.findViewById(R.id.no_device);
         initAdapter();
         devicesLogList.setAdapter(adapter);
         return view;
@@ -51,7 +54,10 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
                     getDao(BluetoothSheriffDevice.class).queryBuilder().
                     limit(Long.parseLong(String.valueOf(10)))
                     .offset(Long.parseLong("0")).orderBy("date", false). query();
+            if(data.size()>0)
             adapter = new DeviceLogListAdapter(data, getActivity());
+            else
+               nodevicesTxt.setVisibility(View.VISIBLE);
         }catch (Exception e){
             Log.e("ERROR",e.getMessage());
         }

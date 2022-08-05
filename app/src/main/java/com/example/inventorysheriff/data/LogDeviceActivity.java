@@ -39,7 +39,7 @@ public class LogDeviceActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         try {
-            //createLogDevices();
+           //createLogDevices();
         }catch (Exception e){
             Log.e("ERROR",e.getMessage());
         }

@@ -28,6 +28,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
      */
     //        nombre de la tabla, clave primaria
     private Dao<BluetoothSheriffDevice, String> sheriffDao;
+    private Dao<User, String> userSheriffDao;
 
 
 
@@ -45,7 +46,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
              * creates the Todo database table
              */
             TableUtils.createTableIfNotExists(connectionSource, BluetoothSheriffDevice.class);
-
+            TableUtils.createTableIfNotExists(connectionSource, User.class);
 
         } catch (SQLException e) {
             Log.e("ERROR",e.getMessage());
@@ -60,6 +61,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
              */
             if(oldVer<newVer) {
                 TableUtils.dropTable(connectionSource, BluetoothSheriffDevice.class, true);
+                TableUtils.dropTable(connectionSource, User.class, true);
                 }
 
         } catch (SQLException e) {
@@ -88,5 +90,11 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return sheriffDao;
     }
 
+    public Dao<User, String> getUserSheriffDao() throws SQLException {
+        if (userSheriffDao == null) {
+            userSheriffDao = getDao(User.class);
+        }
+        return userSheriffDao;
+    }
 
 }

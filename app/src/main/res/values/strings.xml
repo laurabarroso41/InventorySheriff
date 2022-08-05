@@ -32,7 +32,7 @@
     <string name="reading_item_characteristics">Reading characteristics from the device</string>
     <string name="title_activity_log_device">LogDeviceActivity</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
+    <string name="first_fragment_label">Devices Log </string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
@@ -43,4 +43,5 @@
     <string name="discover_devices">Discover devices</string>
     <string name="devices_log">Devices Log</string>
     <string name="information">Information</string>
+    <string name="no_devices_record">No devices recorded yet</string>
 </resources>

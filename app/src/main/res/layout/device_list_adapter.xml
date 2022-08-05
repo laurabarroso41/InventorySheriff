@@ -6,10 +6,9 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
 
 
         <TextView
@@ -17,27 +16,27 @@
             style="@style/TextAppearance.AppCompat.Large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
 
         <TextView
             android:id="@+id/address"
             android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:textStyle="italic"/>
+            android:layout_below="@+id/deviceName"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:textStyle="italic" />
 
-        <Button
+
+        <ImageButton
             android:id="@+id/connectBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            android:layout_gravity="center_vertical"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_send"
             android:text="@string/connect" />
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+    </RelativeLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

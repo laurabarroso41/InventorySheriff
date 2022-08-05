@@ -7,9 +7,21 @@
    >
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+     android:orientation="vertical" android:layout_height="match_parent">
     <ProgressBar android:layout_height="wrap_content" android:layout_width="wrap_content"
        android:visibility="gone" android:id="@+id/progress" android:indeterminate="true"/>
-    <ListView android:id="@+id/log_devices_list" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <ListView android:id="@+id/log_devices_list" android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/no_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_gravity="center"
+        android:text="@string/no_devices_record"
+        android:visibility="gone"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginTop="20dp"
+      />
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

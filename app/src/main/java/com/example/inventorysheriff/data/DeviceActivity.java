@@ -60,7 +60,8 @@ public class DeviceActivity extends AppCompatActivity {
         deviceContent = findViewById(R.id.device_content);
         contentHolder = findViewById(R.id.content_holder);
         sheriffDevice = new BluetoothSheriffDevice();
-        String address = savedInstanceState.getString("peripheral");
+        Bundle extras = getIntent().getExtras();
+        String address =  extras.getString("peripheral");
         databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
         manager = new BluetoothCentralManager(DeviceActivity.this,
                 new BluetoothCentralManagerCallback() {
@@ -69,7 +70,7 @@ public class DeviceActivity extends AppCompatActivity {
                     public void onDiscoveredPeripheral(BluetoothPeripheral peripheral,
                                                        ScanResult scanResult) {
                         if (peripheral.getBondState() == BondState.NONE &&
-                                !address.equals(peripheral.getAddress())) {
+                                address.equals(peripheral.getAddress())) {
                             peripheral.createBond();
                         }
                     }
@@ -109,9 +110,6 @@ public class DeviceActivity extends AppCompatActivity {
 
 
     public void connectToDevice(BluetoothPeripheral peripheral){
-        Intent t = new Intent(this, DeviceActivity.class);
-        t.putExtra("peripheral",peripheral.getAddress());
-        startActivity(t);
         Snackbar.make(deviceContent,R.string.establishing_connection,Snackbar.LENGTH_LONG).show();
 
         manager.autoConnectPeripheral(peripheral, new BluetoothPeripheralCallback() {
@@ -133,6 +131,8 @@ public class DeviceActivity extends AppCompatActivity {
                     BluetoothBytesParser parser = new BluetoothBytesParser(value);
                     double weight = parser.getFloatValue(FORMAT_UINT32) ;
                     sheriffDevice.setWeight(weight);
+                }else{
+                    Log.e("","---------- service "+characteristic.getUuid());
                 }
                 sheriffDevice.setDate(new Date(new java.util.Date().getTime()));
                 try {

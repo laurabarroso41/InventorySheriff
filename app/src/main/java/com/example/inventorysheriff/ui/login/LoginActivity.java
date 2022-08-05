@@ -17,6 +17,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
@@ -26,8 +27,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -39,9 +42,12 @@ import android.widget.Toast;
 
 import com.example.inventorysheriff.R;
 import com.example.inventorysheriff.data.DiscoveryDevicesActivity;
+import com.example.inventorysheriff.data.model.DatabaseHelper;
+import com.example.inventorysheriff.data.model.User;
 import com.example.inventorysheriff.ui.login.LoginViewModel;
 import com.example.inventorysheriff.ui.login.LoginViewModelFactory;
 import com.example.inventorysheriff.databinding.ActivityLoginBinding;
+import com.j256.ormlite.logger.LogBackendUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +68,27 @@ public class LoginActivity extends AppCompatActivity {
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
-
+        loginViewModel.setContext(LoginActivity.this);
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
         final ProgressBar loadingProgressBar = binding.loading;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean initial = prefs.getBoolean("initial",true);
+        if(initial){
+            prefs.edit().putBoolean("initial",false).commit();
+            User u = new User();
+            u.setUserName("admin");
+            u.setPassword("sheriff");
+            try {
+                new DatabaseHelper(this).getUserSheriffDao().create(u);
+            }catch (Exception e)
+            {
+                Log.e("ERROR",e.getMessage());
+            }
+
+        }
+
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -128,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
+                  loginViewModel.login(usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
                 }
                 return false;
@@ -139,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
+             loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
             }
         });

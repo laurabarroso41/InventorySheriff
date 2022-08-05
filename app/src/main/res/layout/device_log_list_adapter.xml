@@ -12,7 +12,7 @@
         android:orientation="vertical">
 
         <TextView android:id="@+id/deviceDate" android:layout_width="match_parent"
-            android:padding="10dp" android:background="@android:color/holo_blue_light"
+            android:padding="10dp" android:background="@color/design_default_color_secondary_variant"
             android:textColor="@android:color/white"
             android:textStyle="bold" android:visibility="gone"
             android:layout_height="wrap_content" />
@@ -22,23 +22,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </androidx.appcompat.widget.LinearLayoutCompat>
-
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:textStyle="italic" android:layout_marginRight="20dp"/>
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent" android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" android:layout_marginTop="10dp">
 
         <TextView
-            android:id="@+id/address"
+            android:id="@+id/item"
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:textStyle="italic" android:layout_marginRight="20dp"/>
+            android:textStyle="italic|bold"/>
         <TextView
+            android:layout_marginLeft="10dp"
             android:id="@+id/weight"
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:textStyle="italic"/>
+            android:textStyle="italic|bold"/>
 
 
     </androidx.appcompat.widget.LinearLayoutCompat>

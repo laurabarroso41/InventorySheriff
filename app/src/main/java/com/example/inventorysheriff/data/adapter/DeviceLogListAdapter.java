@@ -55,6 +55,7 @@ public class DeviceLogListAdapter extends ArrayAdapter<BluetoothSheriffDevice> {
             viewHolder.txtAddress = (TextView) convertView.findViewById(R.id.address);
             viewHolder.txtDate = (TextView)  convertView.findViewById(R.id.deviceDate);
             viewHolder.txtWeigth = (TextView)  convertView.findViewById(R.id.weight);
+            viewHolder.txtItem = (TextView)  convertView.findViewById(R.id.item);
             result=convertView;
             convertView.setTag(viewHolder);
         } else {
@@ -74,7 +75,8 @@ public class DeviceLogListAdapter extends ArrayAdapter<BluetoothSheriffDevice> {
             lastDate = dataModel.getDate();
             viewHolder.txtDate.setVisibility(View.VISIBLE);
         }
-        viewHolder.txtWeigth.setText(String.valueOf(dataModel.getWeight()));
+        viewHolder.txtWeigth.setText("Weight:"+String.valueOf(dataModel.getWeight()));
+        viewHolder.txtItem.setText("Item:"+String.valueOf(dataModel.getItem()));
         // Return the completed view to render on screen
         return convertView;
     }
@@ -84,6 +86,7 @@ public class DeviceLogListAdapter extends ArrayAdapter<BluetoothSheriffDevice> {
         TextView txtName;
         TextView txtAddress;
         TextView txtDate;
+        TextView txtItem;
         TextView txtWeigth;
     }
 

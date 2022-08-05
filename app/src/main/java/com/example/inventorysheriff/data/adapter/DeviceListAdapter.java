@@ -8,6 +8,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import com.example.inventorysheriff.R;
 import com.example.inventorysheriff.data.DiscoveryDevicesActivity;
@@ -52,7 +53,7 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothPeripheral> {
             convertView = inflater.inflate(R.layout.device_list_adapter, parent, false);
             viewHolder.txtName = (TextView) convertView.findViewById(R.id.deviceName);
             viewHolder.txtAddress = (TextView) convertView.findViewById(R.id.address);
-            viewHolder.btnConnect = (Button)convertView.findViewById(R.id.connectBtn);
+            viewHolder.btnConnect = (ImageButton)convertView.findViewById(R.id.connectBtn);
             result=convertView;
             convertView.setTag(viewHolder);
         } else {
@@ -84,7 +85,7 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothPeripheral> {
     private static class ViewHolder {
         TextView txtName;
         TextView txtAddress;
-        Button btnConnect;
+        ImageButton btnConnect;
     }
 
 
