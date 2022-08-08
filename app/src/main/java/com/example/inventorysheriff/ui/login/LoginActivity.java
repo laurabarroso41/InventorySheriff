@@ -58,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private BluetoothAdapter mBTAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
+    private static final int REQUEST_PERMISSIONS = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,32 @@ public class LoginActivity extends AppCompatActivity {
 
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        boolean hasPermission = hasPermissions(this, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_ADVERTISE);
+
+        if(!hasPermission){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.need_permission);
+            builder.setTitle(R.string.warning);
+            builder.setPositiveButton(R.string.grant_permission, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ActivityCompat.requestPermissions(LoginActivity.this,
+                            new String[]{ Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN,
+                                    Manifest.permission.BLUETOOTH_ADVERTISE
+                            }, REQUEST_PERMISSIONS);
+                }
+            });
+            builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    showFinishDialog(getResources().getString(R.string.closing_app));
+                    dialogInterface.dismiss();
+                }
+            });
+            builder.show();
+        }
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
@@ -75,6 +102,7 @@ public class LoginActivity extends AppCompatActivity {
         final ProgressBar loadingProgressBar = binding.loading;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean initial = prefs.getBoolean("initial",true);
+
         if(initial){
            loginButton.setText(R.string.register);
         }
@@ -192,5 +220,30 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    public  boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void showFinishDialog(String message){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message);
+        builder.setTitle(R.string.warning);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        });
+
+        builder.show();
     }
 }
