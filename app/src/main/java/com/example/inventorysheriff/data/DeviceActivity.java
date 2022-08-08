@@ -126,7 +126,7 @@ public class DeviceActivity extends AppCompatActivity {
                     BluetoothBytesParser parser = new BluetoothBytesParser(value);
                     // Parse flag byte
                     final String id = parser.getStringValue();
-                    sheriffDevice.setItem(id);
+                   // sheriffDevice.setItem(id);
                 }else if(characteristic.getUuid().equals(WEIGTH_CHARACTERISTIC_UUID)) {
                     BluetoothBytesParser parser = new BluetoothBytesParser(value);
                     double weight = parser.getFloatValue(FORMAT_UINT32) ;

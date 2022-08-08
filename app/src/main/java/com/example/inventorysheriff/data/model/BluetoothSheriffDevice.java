@@ -1,6 +1,7 @@
 package com.example.inventorysheriff.data.model;
 
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.stmt.query.In;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.sql.Date;
@@ -14,7 +15,7 @@ public class BluetoothSheriffDevice {
     @DatabaseField(generatedId = true, columnName = "device_id")
     public int deviceId;
     @DatabaseField(columnName = "item")
-    private String item;
+    private Integer item;
     @DatabaseField(columnName = "weight")
     private double weight;
     @DatabaseField(columnName = "date")
@@ -40,11 +41,11 @@ public class BluetoothSheriffDevice {
         this.address = address;
     }
 
-    public void setItem(String item) {
+    public void setItem(Integer item) {
         this.item = item;
     }
 
-    public String getItem() {
+    public Integer getItem() {
         return item;
     }
 

@@ -74,7 +74,7 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothPeripheral> {
             @Override
             public void onClick(View view) {
                 viewHolder.btnConnect.setVisibility(View.GONE );
-                ((DiscoveryDevicesActivity) mContext).connectToDevice(dataModel);
+             //   ((DiscoveryDevicesActivity) mContext).connectToDevice(dataModel);
             }
         });
         // Return the completed view to render on screen

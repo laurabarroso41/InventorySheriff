@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import javax.xml.validation.Validator;
 
-public class DeviceLogListFragment extends Fragment  implements AbsListView.OnScrollListener {
+public class DeviceLogListFragment extends Fragment implements AbsListView.OnScrollListener{
 
 
     ListView devicesLogList;
@@ -32,6 +33,8 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
     private Handler handler = new Handler();
     private ProgressBar progressBar;
     private TextView nodevicesTxt;
+    private ScrollView scrollView;
+    private long genericCount;
 
     @Override
     public View onCreateView(
@@ -43,6 +46,7 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
         devicesLogList.setOnScrollListener(DeviceLogListFragment.this);
         progressBar = view.findViewById(R.id.progress);
         nodevicesTxt = view.findViewById(R.id.no_device);
+
         initAdapter();
         devicesLogList.setAdapter(adapter);
         return view;
@@ -53,9 +57,13 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
             List<BluetoothSheriffDevice> data = new DatabaseHelper(getActivity()).
                     getDao(BluetoothSheriffDevice.class).queryBuilder().
                     limit(Long.parseLong(String.valueOf(10)))
-                    .offset(Long.parseLong("0")).orderBy("date", false). query();
-            if(data.size()>0)
-            adapter = new DeviceLogListAdapter(data, getActivity());
+                    .offset(Long.parseLong("0")).orderBy("date", false)
+                    .query();
+            if(data.size()>0) {
+                adapter = new DeviceLogListAdapter(data, getActivity());
+                genericCount = new DatabaseHelper(getActivity()).getBluetoothSheriffDeviceDao().countOf();
+
+            }
             else
                nodevicesTxt.setVisibility(View.VISIBLE);
         }catch (Exception e){
@@ -63,56 +71,19 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
         }
     }
 
+
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         int itemsLastIndex = adapter.getCount() - 1;    //Index of the Last Item of Data Set
-        int lastIndex = itemsLastIndex ;             //Add the loadMoreView item at the bottom
-        Log.e("index","visibleLastIndex = "+visibleLastIndex+" lastIndex = "+lastIndex);
-        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE &&
-                visibleLastIndex == lastIndex) {
+        int lastIndex = itemsLastIndex + 1;             //Add the loadMoreView item at the bottom
+
+        Log.e("","visibleLastIndex = "+visibleLastIndex+" lastIndex = "+lastIndex);
+        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                && visibleLastIndex == itemsLastIndex) {
             //If it's automatic loading, you can put asynchronous loading data code here.
             Log.i("LOADMORE", "loading...");
-            loadMore(devicesLogList);
+            loadMore(view);
         }
-    }
-
-
-    /**
-     * Click on the button event
-     * @param view
-     */
-    public void loadMore(View view) {
-       progressBar.setVisibility(View.VISIBLE);
-       handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                loadData();
-                adapter.notifyDataSetChanged();
-                devicesLogList.setSelection(visibleLastIndex - visibleItemCount + 1);
-                progressBar.setVisibility(View.GONE);
-            }
-        }, 2000);
-    }
-
-    private void loadData() {
-        try {
-            List<BluetoothSheriffDevice> list =adapter.getDataSet();
-            visibleItemCount +=10;
-            visibleLastIndex+=10;
-            List<BluetoothSheriffDevice> aux =
-            new DatabaseHelper(getActivity()).
-                    getDao(BluetoothSheriffDevice.class).queryBuilder().
-                    limit(Long.parseLong(String.valueOf(visibleItemCount)))
-                    .offset(Long.parseLong(String.valueOf(visibleLastIndex))).
-                    orderBy("date", false).query();
-            if (aux!=null && !aux.isEmpty()){
-                list.addAll(aux);
-            }
-            adapter.setDataSet(list);
-        }catch (Exception e){
-            Log.e("ERROR",e.getMessage());
-        }
-
     }
 
     @Override
@@ -120,4 +91,49 @@ public class DeviceLogListFragment extends Fragment  implements AbsListView.OnSc
         this.visibleItemCount = visibleItemCount;
         visibleLastIndex = firstVisibleItem + visibleItemCount - 1;
     }
+    /**
+     * Click on the button event
+     * @param view
+     */
+    public void loadMore(View view) {
+        if (genericCount>adapter.getCount()) {
+            if (progressBar != null)
+                progressBar.setVisibility(View.VISIBLE);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    loadData();
+                    adapter.notifyDataSetChanged();
+                    //devicesLogList.setSelection(visibleLastIndex - visibleItemCount + 1);
+                    progressBar.setVisibility(View.GONE);
+                }
+            }, 2000);
+        }
+    }
+
+    private void loadData() {
+        try {
+            List<BluetoothSheriffDevice> list =adapter.getDataSet();
+            List<BluetoothSheriffDevice> aux =
+            new DatabaseHelper(getActivity()).
+                    getDao(BluetoothSheriffDevice.class).queryBuilder().
+                    limit(Long.parseLong(String.valueOf(visibleLastIndex+10)))
+                    .offset(Long.parseLong(String.valueOf(visibleLastIndex+1
+                    ))).
+                    orderBy("date", false).query();
+            if (aux!=null && !aux.isEmpty()){
+                list.addAll(aux);
+            }
+            adapter.setDataSet(list);
+            visibleItemCount +=10;
+            visibleLastIndex+=10;
+        }catch (Exception e){
+            Log.e("ERROR",e.getMessage());
+        }
+
+    }
+
+
+
+
 }

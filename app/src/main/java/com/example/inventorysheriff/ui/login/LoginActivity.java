@@ -76,19 +76,8 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean initial = prefs.getBoolean("initial",true);
         if(initial){
-            prefs.edit().putBoolean("initial",false).commit();
-            User u = new User();
-            u.setUserName("admin");
-            u.setPassword("sheriff");
-            try {
-                new DatabaseHelper(this).getUserSheriffDao().create(u);
-            }catch (Exception e)
-            {
-                Log.e("ERROR",e.getMessage());
-            }
-
+           loginButton.setText(R.string.register);
         }
-
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -160,9 +149,23 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
-             loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                if(initial){
+                    prefs.edit().putBoolean("initial",false).commit();
+                    User u = new User();
+                    u.setUserName(usernameEditText.getText().toString().trim());
+                    u.setPassword(passwordEditText.getText().toString().trim());
+                    try {
+                        new DatabaseHelper(LoginActivity.this).getUserSheriffDao().create(u);
+                    }catch (Exception e)
+                    {
+                        Log.e("ERROR",e.getMessage());
+                    }
+                    updateUiWithUser(null);
+                }else {
+                    loadingProgressBar.setVisibility(View.VISIBLE);
+                    loginViewModel.login(usernameEditText.getText().toString(),
+                            passwordEditText.getText().toString());
+                }
             }
         });
 

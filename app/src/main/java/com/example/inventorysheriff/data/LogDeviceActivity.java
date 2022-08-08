@@ -35,14 +35,10 @@ public class LogDeviceActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_device);
+                                         setContentView(R.layout.activity_log_device);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        try {
-           //createLogDevices();
-        }catch (Exception e){
-            Log.e("ERROR",e.getMessage());
-        }
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_log_device);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -55,7 +51,7 @@ public class LogDeviceActivity extends AppCompatActivity {
             device.setDate(new Date(new java.util.Date().getTime()));
             device.setAddress("30:AE:A4:02:33:A2");
             device.setName("sheriff");
-            device.setItem(String.valueOf(i));
+            device.setItem(i);
             device.setWeight(204.3+i);
             helper.getDao(BluetoothSheriffDevice.class).create(device);
         }
@@ -64,7 +60,7 @@ public class LogDeviceActivity extends AppCompatActivity {
             device.setDate(new Date(new java.util.Date().getTime()));
             device.setAddress("30:AE:A4:02:33:A2");
             device.setName("sheriff");
-            device.setItem(String.valueOf(i));
+            device.setItem(i);
             device.setWeight(207.3+i);
             helper.getDao(BluetoothSheriffDevice.class).create(device);
         }

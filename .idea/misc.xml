@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Laura/AndroidStudioProjects/InventorySheriff/app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
+        <entry key="..\:/Users/Laura/AndroidStudioProjects/InventorySheriff/app/src/main/res/layout-w936dp/activity_login.xml" value="0.1" />
         <entry key="..\:/Users/Laura/AndroidStudioProjects/InventorySheriff/app/src/main/res/layout/activity_device.xml" value="0.25" />
         <entry key="..\:/Users/Laura/AndroidStudioProjects/InventorySheriff/app/src/main/res/layout/activity_discovery_devices.xml" value="0.25" />
         <entry key="..\:/Users/Laura/AndroidStudioProjects/InventorySheriff/app/src/main/res/layout/activity_log_device.xml" value="0.22826086956521738" />

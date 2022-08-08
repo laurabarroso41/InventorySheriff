@@ -5,7 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "user_sherif")
 public class User {
-    @DatabaseField(generatedId = false,id = true, columnName = "user_id")
+    @DatabaseField(generatedId = true, columnName = "user_id")
     private Integer id ;
     @DatabaseField(columnName = "userName")
     private String userName;
