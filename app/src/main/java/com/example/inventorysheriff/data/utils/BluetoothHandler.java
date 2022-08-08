@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
+import com.example.inventorysheriff.data.DiscoveryDevicesActivity;
 import com.welie.blessed.BluetoothBytesParser;
 import com.welie.blessed.BluetoothCentralManager;
 import com.welie.blessed.BluetoothCentralManagerCallback;
@@ -57,6 +58,7 @@ public class BluetoothHandler {
     private static final UUID WSS_MEASUREMENT_CHAR_UUID = UUID.fromString("d6e34b6c-72eb-4d9d-b425-96d85670af8a");
 
 
+
     // Local variables
     public BluetoothCentralManager central;
     private static BluetoothHandler instance = null;
@@ -77,22 +79,6 @@ public class BluetoothHandler {
             // Read manufacturer and model number from the Device Information Service
             peripheral.readCharacteristic(DIS_SERVICE_UUID, MANUFACTURER_NAME_CHARACTERISTIC_UUID);
             peripheral.readCharacteristic(DIS_SERVICE_UUID, MODEL_NUMBER_CHARACTERISTIC_UUID);
-
-            // Turn on notifications for Current Time Service and write it if possible
-            BluetoothGattCharacteristic currentTimeCharacteristic = peripheral.getCharacteristic(CTS_SERVICE_UUID, CURRENT_TIME_CHARACTERISTIC_UUID);
-            if (currentTimeCharacteristic != null) {
-                peripheral.setNotify(currentTimeCharacteristic, true);
-
-                // If it has the write property we write the current time
-                if ((currentTimeCharacteristic.getProperties() & PROPERTY_WRITE) > 0) {
-                    // Write the current time unless it is an Omron device
-                    if (!isOmronBPM(peripheral.getName())) {
-                        BluetoothBytesParser parser = new BluetoothBytesParser();
-                        parser.setCurrentTime(Calendar.getInstance());
-                        peripheral.writeCharacteristic(currentTimeCharacteristic, parser.getValue(), WriteType.WITH_RESPONSE);
-                    }
-                }
-            }
 
             // Try to turn on notifications for other characteristics
 
@@ -158,6 +144,7 @@ public class BluetoothHandler {
     // Callback for central
     private final BluetoothCentralManagerCallback bluetoothCentralManagerCallback = new BluetoothCentralManagerCallback() {
 
+
         @Override
         public void onConnectedPeripheral(@NotNull BluetoothPeripheral peripheral) {
             Log.e("",String.format("connected to '%s'", peripheral.getName()));
@@ -186,12 +173,13 @@ public class BluetoothHandler {
             Log.e("",String.format("Found peripheral '%s'", peripheral.getName()));
             central.stopScan();
 
-            if (peripheral.getName().contains("Contour") && peripheral.getBondState() == BondState.NONE) {
+            if (peripheral.getName().contains("Sheriff") && peripheral.getBondState() == BondState.NONE) {
                 // Create a bond immediately to avoid double pairing popups
                 central.connectPeripheral(peripheral, peripheralCallback);
             } else {
                 central.connectPeripheral(peripheral, peripheralCallback);
             }
+            ((DiscoveryDevicesActivity)context).publishDevice(peripheral);
         }
 
         @Override
@@ -211,16 +199,15 @@ public class BluetoothHandler {
         }
     };
 
-    public static synchronized BluetoothHandler getInstance(Context context) {
+    public static synchronized BluetoothHandler getInstance(Context context ) {
         if (instance == null) {
-            instance = new BluetoothHandler(context.getApplicationContext());
+            instance = new BluetoothHandler(context.getApplicationContext() );
         }
         return instance;
     }
 
-    private BluetoothHandler(Context context) {
+    private BluetoothHandler(Context context ) {
         this.context = context;
-
         // Create BluetoothCentral
         central = new BluetoothCentralManager(context, bluetoothCentralManagerCallback, new Handler());
 

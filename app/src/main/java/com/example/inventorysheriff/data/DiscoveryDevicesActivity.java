@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.inventorysheriff.R;
 import com.example.inventorysheriff.data.adapter.DeviceListAdapter;
@@ -55,6 +57,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     private List<String> adresses = new ArrayList<>();
     ProgressBar progressBar;
     private final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+    private TextView blackBoard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         adapter = new DeviceListAdapter(devices, DiscoveryDevicesActivity.this);
         devicesListView.setAdapter(adapter);
         progressBar = findViewById(R.id.progress);
+        blackBoard = findViewById(R.id.blackboard);
         registerReceiver(locationServiceStateReceiver, new IntentFilter((LocationManager.MODE_CHANGED_ACTION)));
         registerReceiver(weightDataReceiver, new IntentFilter(BluetoothHandler.MEASUREMENT_WEIGHT));
     }
@@ -309,5 +313,15 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
                     .create()
                     .show();
         }
+    }
+
+    public void publishDevice(BluetoothPeripheral peripheral){
+        Log.e("", "Found peripheral '%s'" + peripheral.getName());
+        Log.e("FOUND!", "PERIPHERAL FOUND!!!!");
+        StringBuffer text = new StringBuffer(blackBoard.getText().toString());
+        text.append("\n");
+        text.append(String.format(getString(R.string.peripheral_found)+": %s on address: %s",peripheral.getName(),peripheral.getAddress()));
+        text.append(getString(R.string.establishing_connection));
+        blackBoard.setText(text.toString());
     }
 }
