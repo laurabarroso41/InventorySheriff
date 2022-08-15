@@ -46,4 +46,5 @@
     <string name="no_devices_record">No devices recorded yet</string>
     <string name="register">Register</string>
     <string name="peripheral_found">"Peripheral found: "</string>
+    <string name="searching">Searching...</string>
 </resources>

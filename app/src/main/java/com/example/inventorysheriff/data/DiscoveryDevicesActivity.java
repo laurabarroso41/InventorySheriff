@@ -19,9 +19,11 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -56,7 +58,6 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     DeviceListAdapter adapter;
     private List<String> adresses = new ArrayList<>();
     ProgressBar progressBar;
-    private final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
     private TextView blackBoard;
 
     @Override
@@ -68,7 +69,8 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         devicesListView.setAdapter(adapter);
         progressBar = findViewById(R.id.progress);
         blackBoard = findViewById(R.id.blackboard);
-        registerReceiver(locationServiceStateReceiver, new IntentFilter((LocationManager.MODE_CHANGED_ACTION)));
+        registerReceiver(locationServiceStateReceiver,
+                new IntentFilter((LocationManager.MODE_CHANGED_ACTION)));
         registerReceiver(weightDataReceiver, new IntentFilter(BluetoothHandler.MEASUREMENT_WEIGHT));
     }
 
@@ -79,8 +81,9 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         if (getBluetoothManager().getAdapter() != null) {
             if (!isBluetoothEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-
+                if (ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
+                {
                     return;
                 }
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -109,7 +112,8 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         List<String> missingPermissions = new ArrayList<>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             for (String requiredPermission : requiredPermissions) {
-                if (getApplicationContext().checkSelfPermission(requiredPermission) != PackageManager.PERMISSION_GRANTED) {
+                if (getApplicationContext().checkSelfPermission(requiredPermission) !=
+                    PackageManager.PERMISSION_GRANTED) {
                     missingPermissions.add(requiredPermission);
                 }
             }
@@ -119,9 +123,11 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
 
     private String[] getRequiredPermissions() {
         int targetSdkVersion = getApplicationInfo().targetSdkVersion;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S)
+        {
             return new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT};
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q)
+        {
             return new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
         } else return new String[]{Manifest.permission.ACCESS_COARSE_LOCATION};
     }
@@ -129,7 +135,8 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     private void permissionsGranted() {
         // Check if Location services are on because they are required to make scanning work for SDK < 31
         int targetSdkVersion = getApplicationInfo().targetSdkVersion;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && targetSdkVersion < Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && targetSdkVersion < Build.VERSION_CODES.S)
+        {
             if (checkLocationServices()) {
                 initBluetoothHandler();
             }
@@ -147,7 +154,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
 
     private void initBluetoothHandler()
     {
-        BluetoothHandler.getInstance(getApplicationContext());
+        BluetoothHandler.getInstance(DiscoveryDevicesActivity.this);
     }
 
     @NotNull
@@ -156,7 +163,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     }
 
     private BluetoothPeripheral getPeripheral(String peripheralAddress) {
-        BluetoothCentralManager central = BluetoothHandler.getInstance(getApplicationContext()).central;
+        BluetoothCentralManager central = BluetoothHandler.getInstance(DiscoveryDevicesActivity.this).central;
         return central.getPeripheral(peripheralAddress);
     }
 
@@ -235,14 +242,16 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
             String action = intent.getAction();
             if (action != null && action.equals(LocationManager.MODE_CHANGED_ACTION)) {
                 boolean isEnabled = areLocationServicesEnabled();
-                Log.e("",String.format("Location service state changed to: %s", isEnabled ? "on" : "off"));
+                Log.e("",String.format("Location service state changed to: %s",
+                             isEnabled ? "on" : "off"));
                checkPermissions();
             }
         }
     };
 
     private boolean areLocationServicesEnabled() {
-        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getApplicationContext().
+                                          getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null) {
             Log.e("","could not get location manager");
             return false;
@@ -272,9 +281,7 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // if this button is clicked, just close
-                            // the dialog box and do nothing
-                            dialog.cancel();
+                          dialog.cancel();
                         }
                     })
                     .create()
@@ -288,7 +295,6 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         // Check if all permission were granted
         boolean allGranted = true;
         for (int result : grantResults) {
@@ -320,8 +326,16 @@ public class DiscoveryDevicesActivity extends AppCompatActivity {
         Log.e("FOUND!", "PERIPHERAL FOUND!!!!");
         StringBuffer text = new StringBuffer(blackBoard.getText().toString());
         text.append("\n");
-        text.append(String.format(getString(R.string.peripheral_found)+": %s on address: %s",peripheral.getName(),peripheral.getAddress()));
+        if(peripheral.getName()!=null && !peripheral.getName().isEmpty()){
+            text.append(String.format(getString(R.string.peripheral_found)+" %s",peripheral.getName()));
+        }else{
+            text.append(String.format(getString(R.string.peripheral_found)+" %s","unknow"));
+        }
+        text.append("\n");
+        text.append(String.format("Address: %s",peripheral.getAddress()));
+        text.append("\n");
         text.append(getString(R.string.establishing_connection));
+        text.append("...");
         blackBoard.setText(text.toString());
     }
 }

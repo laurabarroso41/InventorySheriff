@@ -64,7 +64,7 @@ public class BluetoothHandler {
     private static BluetoothHandler instance = null;
     private final Context context;
     private final Handler handler = new Handler();
-    private int currentTimeCounter = 0;
+
 
     // Callback for peripherals
     private final BluetoothPeripheralCallback peripheralCallback = new BluetoothPeripheralCallback() {
@@ -201,7 +201,7 @@ public class BluetoothHandler {
 
     public static synchronized BluetoothHandler getInstance(Context context ) {
         if (instance == null) {
-            instance = new BluetoothHandler(context.getApplicationContext() );
+            instance = new BluetoothHandler(context );
         }
         return instance;
     }
@@ -228,7 +228,5 @@ public class BluetoothHandler {
         },1000);
     }
 
-    private boolean isOmronBPM(final String name) {
-        return name.contains("BLESmart_") || name.contains("BLEsmart_");
-    }
+
 }
